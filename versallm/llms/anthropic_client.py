@@ -12,7 +12,7 @@ from .base import VersaLLM
 
 def _tool_def_conversion(
         tool_definition: List[Dict[str, Any]]
-) -> List[Dict[str, Any]]:
+    ) -> List[Dict[str, Any]]:
     anthropic_tool_def = []
 
     for item in tool_definition:
@@ -42,6 +42,7 @@ class AnthropicClient(VersaLLM):
             **kwargs: Any,
     ):
         super().__init__(model, api_key, temperature, max_output_tokens, **kwargs)
+        self.client = anthropic.Anthropic(api_key=api_key)
         self.system_prompt: Optional[str] = None  # Initialize system_prompt
         self.memory: ConversationalMemory = ConversationalMemory()  # Initialize chat_history
 
@@ -66,11 +67,13 @@ class AnthropicClient(VersaLLM):
         return None
 
     def completion(
-            self, user_prompt: str, tools=None, **kwargs: Any
+            self, user_prompt: str,
+            tools=None,
+            **kwargs: Any
     ) -> Response:
         if tools is None:
             tools = []
-        client = anthropic.Anthropic()
+        client = self.client
 
         if "messages" in kwargs:
             message = kwargs["messages"]
